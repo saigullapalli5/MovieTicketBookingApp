@@ -4,14 +4,20 @@ require("dotenv").config();
 // Create transporter using Gmail service
 const transporter = nodemailer.createTransport({
   service: "gmail",
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: parseInt(process.env.SMTP_PORT) || 465,
+  secure: process.env.SMTP_SECURE === "true",
   auth: {
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    pass: process.env.SMTP_PASS, // Using SMTP_PASS from your .env
   },
-  tls: {
-    // Do not fail on invalid certificates (for development only!)
-    rejectUnauthorized: false
-  }
+  // TLS configuration - only disable in development
+  tls:
+    process.env.NODE_ENV === "development"
+      ? {
+          rejectUnauthorized: false,
+        }
+      : undefined,
 });
 
 // Verify the transporter connection
