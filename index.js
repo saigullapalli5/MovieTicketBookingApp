@@ -21,7 +21,29 @@ const { cleanupOldBookings } = require("./utils/cleanupService");
 
 const app = express();
 const cors = require("cors");
-app.use(cors());
+
+// Configure CORS
+const allowedOrigins = [
+  "https://movie-ticket-booking-app-frontend-iota.vercel.app",
+  "http://localhost:5173", // Default Vite dev server port
+  "http://localhost:3000", // If you're using create-react-app
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.listen(3000, () => {
@@ -53,12 +75,12 @@ const connectToMongo = async () => {
   }
 
   // Handle connection events
-  mongoose.connection.on('error', (err) => {
-    console.error('MongoDB connection error:', err);
+  mongoose.connection.on("error", (err) => {
+    console.error("MongoDB connection error:", err);
   });
 
-  mongoose.connection.on('disconnected', () => {
-    console.log('MongoDB disconnected. Attempting to reconnect...');
+  mongoose.connection.on("disconnected", () => {
+    console.log("MongoDB disconnected. Attempting to reconnect...");
     // Attempt to reconnect
     setTimeout(connectToMongo, 5000);
   });
