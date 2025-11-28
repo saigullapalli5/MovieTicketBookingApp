@@ -72,8 +72,8 @@ app.use(
 app.use(express.json());
 
 // Test endpoint
-app.get("/api/test", (req, res) => {
-  res.json({ status: true, message: "Backend is working!" });
+app.get('/api/test', (req, res) => {
+  res.json({ status: true, message: 'Backend is working!' });
 });
 
 app.listen(3000, () => {
