@@ -22,12 +22,35 @@ const { cleanupOldBookings } = require("./utils/cleanupService");
 const app = express();
 const cors = require("cors");
 
-// Configure CORS
+// Configure CORS - More permissive for development
 const allowedOrigins = [
   "https://movie-ticket-booking-app-frontend-iota.vercel.app",
-  "http://localhost:5173", // Default Vite dev server port
-  "http://localhost:3000", // If you're using create-react-app
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://movieticketbookingapp-pw6b.onrender.com",
 ];
+
+// Enable pre-flight requests
+app.options("*", cors());
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", true);
+
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 app.use(
   cors({
@@ -35,6 +58,7 @@ app.use(
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
+        console.warn("CORS blocked request from origin:", origin);
         const msg =
           "The CORS policy for this site does not allow access from the specified Origin.";
         return callback(new Error(msg), false);
@@ -46,6 +70,12 @@ app.use(
 );
 
 app.use(express.json());
+
+// Test endpoint
+app.get("/api/test", (req, res) => {
+  res.json({ status: true, message: "Backend is working!" });
+});
+
 app.listen(3000, () => {
   console.log("Server is running on 3000 port");
 });
